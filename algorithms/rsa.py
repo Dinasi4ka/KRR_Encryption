@@ -1,7 +1,7 @@
 from algorithms.cipher import Cipher
 
 class RSACipher(Cipher):
-    def __init__(self, p, q, exponent):
+    def __init__(self, p, q, exponent, block_size=4):
         super().__init__()
         
         if p <= 1 or q <= 1:
@@ -12,6 +12,7 @@ class RSACipher(Cipher):
         self.n = p * q 
         self.exponent = exponent  
         self.private_exponent = self._calculate_private_exponent(p, q, exponent)
+        self.block_size = block_size
 
     def _gcd(self, a, b):
         while b:
@@ -38,10 +39,19 @@ class RSACipher(Cipher):
             raise ValueError("e and φ(n) must be coprime.")
 
         return self._multiplicative_inverse(e, phi)
+    
 
     def encrypt(self, plaintext):
-        plaintext = self._preprocess_text(plaintext)  
-        return [
-            pow(self._convert_to_num(char), self.exponent, self.n) 
-            for char in plaintext if char in self._get_alphabet(plaintext)
-        ]
+        plaintext = self._preprocess_text(plaintext)
+        blocks = self._split_into_blocks(plaintext, self.block_size)  # Розбиваємо на блоки
+        encrypted_blocks = []
+
+        for block in blocks:
+            block_result = [
+                pow(self._convert_to_num(char), self.exponent, self.n) 
+                for char in block if char in self._get_alphabet(block)
+            ]
+            encrypted_blocks.append(block_result)
+
+        return encrypted_blocks
+

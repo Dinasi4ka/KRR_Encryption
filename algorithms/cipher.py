@@ -23,6 +23,9 @@ class Cipher(ABC):
         alphabet = self._get_alphabet(char)
         return self._get_index(char, alphabet) + 1
 
+    def _split_into_blocks(self, text, block_size):
+        return [text[i:i + block_size] for i in range(0, len(text), block_size)]
+
     @abstractmethod
     def encrypt(self, plaintext):
         pass
